@@ -1,4 +1,4 @@
-package com.appraisal.dto.request;
+package com.psi.appraisal.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

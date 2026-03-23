@@ -12,7 +12,6 @@ import com.psi.appraisal.repository.UserRepository;
 import com.psi.appraisal.services.FeedbackService;
 import com.psi.appraisal.services.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +26,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final AppraisalRepository appraisalRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
     public FeedbackResponse submitFeedback(FeedbackRequest request, Long reviewerId) {
-        Appraisal appraisal = appraisalRepository.findById(request.getAppraisalId())
+        Appraisal appraisal = appraisalRepository.findByIdWithDetails(request.getAppraisalId())
                 .orElseThrow(() -> new RuntimeException("Appraisal not found"));
 
         User reviewer = userRepository.findById(reviewerId)
@@ -41,7 +39,6 @@ public class FeedbackServiceImpl implements FeedbackService {
         User reviewee = userRepository.findById(request.getRevieweeId())
                 .orElseThrow(() -> new RuntimeException("Reviewee not found"));
 
-        // Guard: prevent duplicate feedback of same type from same reviewer
         if (feedbackRepository.existsByAppraisalIdAndReviewerIdAndFeedbackType(
                 request.getAppraisalId(), reviewerId, request.getFeedbackType())) {
             throw new RuntimeException("You have already submitted "
@@ -59,7 +56,6 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         feedbackRepository.save(feedback);
 
-        // Notify the reviewee that feedback was submitted about them
         notificationService.send(
                 reviewee.getId(),
                 "New feedback received",
@@ -88,12 +84,17 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     private FeedbackResponse mapToResponse(Feedback feedback) {
-        FeedbackResponse response = modelMapper.map(feedback, FeedbackResponse.class);
+        FeedbackResponse response = new FeedbackResponse();
+        response.setId(feedback.getId());
         response.setAppraisalId(feedback.getAppraisal().getId());
         response.setReviewerId(feedback.getReviewer().getId());
         response.setReviewerName(feedback.getReviewer().getFullName());
         response.setRevieweeId(feedback.getReviewee().getId());
         response.setRevieweeName(feedback.getReviewee().getFullName());
+        response.setComments(feedback.getComments());
+        response.setRating(feedback.getRating());
+        response.setFeedbackType(feedback.getFeedbackType());
+        response.setCreatedAt(feedback.getCreatedAt());
         return response;
     }
 }

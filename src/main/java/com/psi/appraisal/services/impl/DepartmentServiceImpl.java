@@ -1,12 +1,13 @@
 package com.psi.appraisal.services.impl;
 
-import com.appraisal.dto.request.CreateDepartmentRequest;
-import com.appraisal.dto.response.DepartmentResponse;
-import com.appraisal.entity.Department;
-import com.appraisal.exception.DuplicateResourceException;
-import com.appraisal.exception.ResourceNotFoundException;
-import com.appraisal.repository.DepartmentRepository;
-import com.appraisal.service.DepartmentService;
+
+import com.psi.appraisal.dtos.CreateDepartmentRequest;
+import com.psi.appraisal.dtos.DepartmentResponse;
+import com.psi.appraisal.entity.Department;
+import com.psi.appraisal.exception.DuplicateResourceException;
+import com.psi.appraisal.exception.ResourceNotFoundException;
+import com.psi.appraisal.repository.DepartmentRepository;
+import com.psi.appraisal.services.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;

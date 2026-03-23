@@ -2,12 +2,12 @@ package com.psi.appraisal.controller;
 
 import java.util.List;
 
+import com.psi.appraisal.dtos.CreateUserRequest;
+import com.psi.appraisal.dtos.UpdateUserRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.psi.appraisal.dtos.ApiResponse;
 import com.psi.appraisal.dtos.UserResponse;
@@ -22,31 +22,56 @@ public class UserController {
 
 	private final UserService userService;
 
-	// Any: get own profile
+	// POST /api/users
+	@PostMapping
+	public ResponseEntity<ApiResponse<UserResponse>> createUser(
+			@Valid @RequestBody CreateUserRequest request) {
+
+		UserResponse response = userService.createUser(request);
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(ApiResponse.success("User created successfully", response));
+	}
+
+	// GET /api/users
+	@GetMapping
+	public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+		return ResponseEntity.ok(ApiResponse.success(userService.getAllUsers()));
+	}
+
 	// GET /api/users/me?userId=1
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<UserResponse>> getMe(@RequestParam Long userId) {
-
-		UserResponse response = userService.getMe(userId);
-		return ResponseEntity.ok(ApiResponse.success(response));
+		return ResponseEntity.ok(ApiResponse.success(userService.getMe(userId)));
 	}
 
-	// Manager/HR: get any user by ID
 	// GET /api/users/{id}
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Long id) {
-
-		UserResponse response = userService.getUserById(id);
-		return ResponseEntity.ok(ApiResponse.success(response));
+		return ResponseEntity.ok(ApiResponse.success(userService.getUserById(id)));
 	}
 
-	// Manager/HR: get all direct reports under a manager
 	// GET /api/users/manager/{managerId}/team
 	@GetMapping("/manager/{managerId}/team")
-	public ResponseEntity<ApiResponse<List<UserResponse>>> getTeam(@PathVariable Long managerId) {
-
-		List<UserResponse> responses = userService.getTeamByManager(managerId);
-		return ResponseEntity.ok(ApiResponse.success(responses));
+	public ResponseEntity<ApiResponse<List<UserResponse>>> getTeam(
+			@PathVariable Long managerId) {
+		return ResponseEntity.ok(ApiResponse.success(userService.getTeamByManager(managerId)));
 	}
 
+	// PUT /api/users/{id}
+	@PutMapping("/{id}")
+	public ResponseEntity<ApiResponse<UserResponse>> updateUser(
+			@PathVariable Long id,
+			@RequestBody UpdateUserRequest request) {
+
+		UserResponse response = userService.updateUser(id, request);
+		return ResponseEntity.ok(ApiResponse.success("User updated successfully", response));
+	}
+
+	// DELETE /api/users/{id}
+	@DeleteMapping("/{id}")
+	public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
+		userService.deleteUser(id);
+		return ResponseEntity.ok(ApiResponse.success("User deactivated successfully", null));
+	}
 }

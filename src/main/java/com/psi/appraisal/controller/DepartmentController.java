@@ -1,9 +1,9 @@
-package com.appraisal.controller;
+package com.psi.appraisal.controller;
 
-import com.appraisal.dto.request.CreateDepartmentRequest;
-import com.appraisal.dto.response.ApiResponse;
-import com.appraisal.dto.response.DepartmentResponse;
-import com.appraisal.service.DepartmentService;
+import com.psi.appraisal.dtos.ApiResponse;
+import com.psi.appraisal.dtos.CreateDepartmentRequest;
+import com.psi.appraisal.dtos.DepartmentResponse;
+import com.psi.appraisal.services.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.appraisal.exception;
+package com.psi.appraisal.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

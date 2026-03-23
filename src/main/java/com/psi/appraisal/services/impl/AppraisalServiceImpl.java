@@ -14,7 +14,6 @@ import com.psi.appraisal.repository.UserRepository;
 import com.psi.appraisal.services.AppraisalService;
 import com.psi.appraisal.services.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +28,10 @@ public class AppraisalServiceImpl implements AppraisalService {
     private final AppraisalRepository appraisalRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
     public AppraisalResponse createAppraisal(CreateAppraisalRequest request) {
-
-        // Guard: no duplicate appraisal for same employee in same cycle
         if (appraisalRepository.existsByCycleNameAndEmployeeId(
                 request.getCycleName(), request.getEmployeeId())) {
             throw new RuntimeException("Appraisal already exists for this employee in cycle: "
@@ -43,7 +39,7 @@ public class AppraisalServiceImpl implements AppraisalService {
         }
 
         User employee = findUserById(request.getEmployeeId());
-        User manager  = findUserById(request.getManagerId());
+        User manager = findUserById(request.getManagerId());
 
         Appraisal appraisal = Appraisal.builder()
                 .cycleName(request.getCycleName())
@@ -57,7 +53,6 @@ public class AppraisalServiceImpl implements AppraisalService {
 
         appraisalRepository.save(appraisal);
 
-        // Notify employee that their appraisal cycle has started
         notificationService.send(
                 employee.getId(),
                 "Appraisal cycle started",
@@ -80,9 +75,8 @@ public class AppraisalServiceImpl implements AppraisalService {
     public AppraisalResponse getAppraisalById(Long appraisalId, Long requesterId) {
         Appraisal appraisal = findAppraisalById(appraisalId);
 
-        // Ownership check: only the employee, their manager, or HR can view
         boolean isEmployee = appraisal.getEmployee().getId().equals(requesterId);
-        boolean isManager  = appraisal.getManager().getId().equals(requesterId);
+        boolean isManager = appraisal.getManager().getId().equals(requesterId);
 
         if (!isEmployee && !isManager) {
             throw new RuntimeException("Access denied: you are not part of this appraisal");
@@ -94,16 +88,14 @@ public class AppraisalServiceImpl implements AppraisalService {
     @Override
     @Transactional
     public AppraisalResponse submitSelfAssessment(Long appraisalId,
-                                                   SelfAssessmentRequest request,
-                                                   Long employeeId) {
+                                                  SelfAssessmentRequest request,
+                                                  Long employeeId) {
         Appraisal appraisal = findAppraisalById(appraisalId);
 
-        // Ownership check: must be the appraisal's own employee
         if (!appraisal.getEmployee().getId().equals(employeeId)) {
             throw new RuntimeException("Access denied: this is not your appraisal");
         }
 
-        // Status check: can only submit if currently PENDING
         if (appraisal.getAppraisalStatus() != AppraisalStatus.PENDING) {
             throw new RuntimeException("Self-assessment already submitted. Current status: "
                     + appraisal.getAppraisalStatus());
@@ -115,7 +107,6 @@ public class AppraisalServiceImpl implements AppraisalService {
         appraisal.setSubmittedAt(LocalDateTime.now());
         appraisalRepository.save(appraisal);
 
-        // Notify manager they have a pending review
         notificationService.send(
                 appraisal.getManager().getId(),
                 "Self-assessment submitted",
@@ -130,16 +121,14 @@ public class AppraisalServiceImpl implements AppraisalService {
     @Override
     @Transactional
     public AppraisalResponse submitManagerReview(Long appraisalId,
-                                                  ManagerReviewRequest request,
-                                                  Long managerId) {
+                                                 ManagerReviewRequest request,
+                                                 Long managerId) {
         Appraisal appraisal = findAppraisalById(appraisalId);
 
-        // Ownership check: must be the assigned manager
         if (!appraisal.getManager().getId().equals(managerId)) {
             throw new RuntimeException("Access denied: you are not the manager for this appraisal");
         }
 
-        // Status check: employee must have submitted first
         if (appraisal.getAppraisalStatus() != AppraisalStatus.SELF_SUBMITTED) {
             throw new RuntimeException("Cannot review yet. Current status: "
                     + appraisal.getAppraisalStatus());
@@ -150,7 +139,6 @@ public class AppraisalServiceImpl implements AppraisalService {
         appraisal.setAppraisalStatus(AppraisalStatus.MANAGER_REVIEWED);
         appraisalRepository.save(appraisal);
 
-        // Notify HR that this appraisal is ready for approval
         notificationService.send(
                 appraisal.getEmployee().getId(),
                 "Manager review completed",
@@ -167,7 +155,6 @@ public class AppraisalServiceImpl implements AppraisalService {
     public AppraisalResponse approveAppraisal(Long appraisalId) {
         Appraisal appraisal = findAppraisalById(appraisalId);
 
-        // Status check: manager must have reviewed first
         if (appraisal.getAppraisalStatus() != AppraisalStatus.MANAGER_REVIEWED) {
             throw new RuntimeException("Cannot approve yet. Current status: "
                     + appraisal.getAppraisalStatus());
@@ -177,7 +164,6 @@ public class AppraisalServiceImpl implements AppraisalService {
         appraisal.setApprovedAt(LocalDateTime.now());
         appraisalRepository.save(appraisal);
 
-        // Notify employee their result is ready
         notificationService.send(
                 appraisal.getEmployee().getId(),
                 "Appraisal approved",
@@ -194,12 +180,10 @@ public class AppraisalServiceImpl implements AppraisalService {
     public AppraisalResponse acknowledgeAppraisal(Long appraisalId, Long employeeId) {
         Appraisal appraisal = findAppraisalById(appraisalId);
 
-        // Ownership check
         if (!appraisal.getEmployee().getId().equals(employeeId)) {
             throw new RuntimeException("Access denied: this is not your appraisal");
         }
 
-        // Status check: must be approved before acknowledgement
         if (appraisal.getAppraisalStatus() != AppraisalStatus.APPROVED) {
             throw new RuntimeException("Cannot acknowledge yet. Current status: "
                     + appraisal.getAppraisalStatus());
@@ -211,10 +195,8 @@ public class AppraisalServiceImpl implements AppraisalService {
         return mapToResponse(appraisal);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────
-
     private Appraisal findAppraisalById(Long id) {
-        return appraisalRepository.findById(id)
+        return appraisalRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new RuntimeException("Appraisal not found with id: " + id));
     }
 
@@ -223,15 +205,25 @@ public class AppraisalServiceImpl implements AppraisalService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    // ModelMapper maps most fields automatically.
-    // Employee/manager names need manual mapping since they are
-    // nested objects (appraisal.employee.fullName → employeeName)
     private AppraisalResponse mapToResponse(Appraisal appraisal) {
-        AppraisalResponse response = modelMapper.map(appraisal, AppraisalResponse.class);
+        AppraisalResponse response = new AppraisalResponse();
+        response.setId(appraisal.getId());
+        response.setCycleName(appraisal.getCycleName());
+        response.setCycleStartDate(appraisal.getCycleStartDate());
+        response.setCycleEndDate(appraisal.getCycleEndDate());
+        response.setCycleStatus(appraisal.getCycleStatus());
         response.setEmployeeId(appraisal.getEmployee().getId());
         response.setEmployeeName(appraisal.getEmployee().getFullName());
         response.setManagerId(appraisal.getManager().getId());
         response.setManagerName(appraisal.getManager().getFullName());
+        response.setSelfAssessment(appraisal.getSelfAssessment());
+        response.setSelfRating(appraisal.getSelfRating());
+        response.setManagerComments(appraisal.getManagerComments());
+        response.setManagerRating(appraisal.getManagerRating());
+        response.setAppraisalStatus(appraisal.getAppraisalStatus());
+        response.setSubmittedAt(appraisal.getSubmittedAt());
+        response.setApprovedAt(appraisal.getApprovedAt());
+        response.setCreatedAt(appraisal.getCreatedAt());
         return response;
     }
 }

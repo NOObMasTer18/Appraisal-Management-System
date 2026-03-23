@@ -4,20 +4,60 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.psi.appraisal.entity.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>{
+public interface UserRepository extends JpaRepository<User, Long> {
 
-	Optional<User> findByEmail(String email);
-	
-	boolean existsByEmail(String email);
-	
-	List<User> findByManagerId(Long managerId);
-	
-	List<User> findByDepartmentId(Long departmentId);
-	
-	List<User> findByIsActiveTrue();
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    @Query("""
+            select distinct u
+            from User u
+            left join fetch u.manager
+            left join fetch u.department
+            """)
+    List<User> findAllWithDetails();
+
+    @Query("""
+            select u
+            from User u
+            left join fetch u.manager
+            left join fetch u.department
+            where u.id = :id
+            """)
+    Optional<User> findByIdWithDetails(@Param("id") Long id);
+
+    @Query("""
+            select distinct u
+            from User u
+            left join fetch u.manager
+            left join fetch u.department
+            where u.manager.id = :managerId
+            """)
+    List<User> findByManagerId(@Param("managerId") Long managerId);
+
+    @Query("""
+            select distinct u
+            from User u
+            left join fetch u.manager
+            left join fetch u.department
+            where u.department.id = :departmentId
+            """)
+    List<User> findByDepartmentId(@Param("departmentId") Long departmentId);
+
+    @Query("""
+            select distinct u
+            from User u
+            left join fetch u.manager
+            left join fetch u.department
+            where u.isActive = true
+            """)
+    List<User> findByIsActiveTrue();
 }

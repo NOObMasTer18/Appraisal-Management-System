@@ -8,7 +8,6 @@ import com.psi.appraisal.repository.NotificationRepository;
 import com.psi.appraisal.repository.UserRepository;
 import com.psi.appraisal.services.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +19,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
 
     @Override
     public void send(Long userId, String title, String message, Type type) {
@@ -43,23 +41,22 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepository
                 .findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
-                .map(n -> modelMapper.map(n, NotificationResponse.class))
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public NotificationResponse markAsRead(Long notificationId, Long userId) {
-        Notification notification = notificationRepository.findById(notificationId)
+        Notification notification = notificationRepository.findByIdWithUser(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
 
-        // Ownership check — can only mark your own notifications
         if (!notification.getUser().getId().equals(userId)) {
             throw new RuntimeException("Access denied");
         }
 
         notification.setRead(true);
         notificationRepository.save(notification);
-        return modelMapper.map(notification, NotificationResponse.class);
+        return mapToResponse(notification);
     }
 
     @Override
@@ -72,5 +69,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public long countUnread(Long userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    }
+
+    private NotificationResponse mapToResponse(Notification notification) {
+        NotificationResponse response = new NotificationResponse();
+        response.setId(notification.getId());
+        response.setTitle(notification.getTitle());
+        response.setMessage(notification.getMessage());
+        response.setType(notification.getType());
+        response.setRead(notification.isRead());
+        response.setCreatedAt(notification.getCreatedAt());
+        return response;
     }
 }

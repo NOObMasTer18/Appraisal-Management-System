@@ -1,6 +1,6 @@
-package com.appraisal.exception;
+package com.psi.appraisal.exception;
 
-import com.appraisal.dto.response.ApiResponse;
+import com.psi.appraisal.dtos.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

@@ -1,7 +1,8 @@
-package com.appraisal.service;
+package com.psi.appraisal.services;
 
-import com.appraisal.dto.request.CreateDepartmentRequest;
-import com.appraisal.dto.response.DepartmentResponse;
+
+import com.psi.appraisal.dtos.CreateDepartmentRequest;
+import com.psi.appraisal.dtos.DepartmentResponse;
 
 import java.util.List;
 

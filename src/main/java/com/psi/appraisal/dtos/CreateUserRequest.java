@@ -1,6 +1,6 @@
-package com.appraisal.dto.request;
+package com.psi.appraisal.dtos;
 
-import com.appraisal.entity.User.Role;
+import com.psi.appraisal.entity.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
