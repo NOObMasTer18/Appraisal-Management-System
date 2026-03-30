@@ -85,4 +85,27 @@ public interface AppraisalRepository extends JpaRepository<Appraisal, Long> {
             """)
     List<Appraisal> findByCycleNameAndManagerId(@Param("cycleName") String cycleName,
                                                 @Param("managerId") Long managerId);
+
+    // ── Report queries ────────────────────────────────────────────
+
+    @Query("SELECT a.appraisalStatus, COUNT(a) FROM Appraisal a WHERE a.cycleName = :cycleName GROUP BY a.appraisalStatus")
+    List<Object[]> countByStatusForCycle(@Param("cycleName") String cycleName);
+
+    @Query("SELECT AVG(a.managerRating) FROM Appraisal a WHERE a.cycleName = :cycleName AND a.appraisalStatus IN ('APPROVED','ACKNOWLEDGED') AND a.managerRating IS NOT NULL")
+    Double averageManagerRatingForCycle(@Param("cycleName") String cycleName);
+
+    @Query("SELECT a.managerRating, COUNT(a) FROM Appraisal a WHERE a.cycleName = :cycleName AND a.appraisalStatus IN ('APPROVED','ACKNOWLEDGED') AND a.managerRating IS NOT NULL GROUP BY a.managerRating ORDER BY a.managerRating")
+    List<Object[]> getRatingDistribution(@Param("cycleName") String cycleName);
+
+    @Query("SELECT a FROM Appraisal a JOIN FETCH a.employee e LEFT JOIN FETCH e.department WHERE a.cycleName = :cycleName AND a.manager.id = :managerId")
+    List<Appraisal> findTeamAppraisalsForCycle(@Param("cycleName") String cycleName, @Param("managerId") Long managerId);
+
+    @Query("SELECT AVG(a.managerRating) FROM Appraisal a WHERE a.cycleName = :cycleName AND a.manager.id = :managerId AND a.managerRating IS NOT NULL")
+    Double averageRatingForTeam(@Param("cycleName") String cycleName, @Param("managerId") Long managerId);
+
+    @Query("SELECT a FROM Appraisal a JOIN FETCH a.employee e LEFT JOIN FETCH e.department JOIN FETCH a.manager WHERE a.cycleName = :cycleName AND a.appraisalStatus NOT IN ('APPROVED','ACKNOWLEDGED')")
+    List<Appraisal> findPendingAppraisalsForCycle(@Param("cycleName") String cycleName);
+
+    @Query("SELECT a FROM Appraisal a JOIN FETCH a.employee JOIN FETCH a.manager WHERE a.employee.id = :employeeId ORDER BY a.cycleStartDate DESC")
+    List<Appraisal> findEmployeeHistory(@Param("employeeId") Long employeeId);
 }

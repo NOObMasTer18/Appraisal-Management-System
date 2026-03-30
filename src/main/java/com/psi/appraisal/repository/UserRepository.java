@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.psi.appraisal.entity.User;
+import com.psi.appraisal.entity.enums.Role;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -60,4 +61,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
             where u.isActive = true
             """)
     List<User> findByIsActiveTrue();
+
+    @Query("""
+            select distinct u
+            from User u
+            left join fetch u.manager
+            left join fetch u.department
+            where u.role = :role and u.isActive = true
+            """)
+    List<User> findByRoleAndIsActiveTrue(@Param("role") Role role);
+
+    List<User> findByDepartmentIdAndIsActiveTrue(Long departmentId);
 }

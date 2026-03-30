@@ -16,7 +16,6 @@ public class GoalResponse {
     private String employeeName;
     private String title;
     private String description;
-    private Integer progressPercent;
     private Status status;
     private LocalDate dueDate;
 }

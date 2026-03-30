@@ -96,7 +96,6 @@ public class GoalServiceImpl implements GoalService {
             throw new UnauthorizedAccessException("Access denied: this is not your goal");
         }
 
-        goal.setProgressPercent(request.getProgressPercent());
         goal.setStatus(request.getStatus());
         goalRepository.save(goal);
         return mapToResponse(goal);
@@ -128,7 +127,6 @@ public class GoalServiceImpl implements GoalService {
         response.setEmployeeName(goal.getEmployee().getFullName());
         response.setTitle(goal.getTitle());
         response.setDescription(goal.getDescription());
-        response.setProgressPercent(goal.getProgressPercent());
         response.setStatus(goal.getStatus());
         response.setDueDate(goal.getDueDate());
         return response;

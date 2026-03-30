@@ -39,4 +39,9 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             where g.employee.id = :employeeId
             """)
     List<Goal> findByEmployeeId(@Param("employeeId") Long employeeId);
+
+    // ── Report queries ────────────────────────────────────────────
+    long countByAppraisalId(Long appraisalId);
+
+    long countByAppraisalIdAndStatus(Long appraisalId, Goal.Status status);
 }

@@ -8,104 +8,135 @@ import org.springframework.web.bind.annotation.*;
 
 import com.psi.appraisal.dtos.ApiResponse;
 import com.psi.appraisal.dtos.AppraisalResponse;
+import com.psi.appraisal.dtos.BulkCycleRequest;
+import com.psi.appraisal.dtos.BulkCycleResponse;
 import com.psi.appraisal.dtos.CreateAppraisalRequest;
 import com.psi.appraisal.dtos.ManagerReviewRequest;
 import com.psi.appraisal.dtos.SelfAssessmentRequest;
 import com.psi.appraisal.services.AppraisalService;
 
 import java.util.List;
- 
+
 @RestController
 @RequestMapping("/api/appraisals")
 @RequiredArgsConstructor
 public class AppraisalController {
- 
+
     private final AppraisalService appraisalService;
- 
-    // HR: create appraisal for an employee in a cycle
+
+    // ── HR: create single appraisal ───────────────────────────────
     // POST /api/appraisals
     @PostMapping
     public ResponseEntity<ApiResponse<AppraisalResponse>> createAppraisal(
             @Valid @RequestBody CreateAppraisalRequest request) {
- 
+
         AppraisalResponse response = appraisalService.createAppraisal(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Appraisal created successfully", response));
     }
- 
-    // Employee: get all my appraisals
+
+    // ── HR: bulk create for all active employees ──────────────────
+    // POST /api/appraisals/cycle/bulk-create
+    @PostMapping("/cycle/bulk-create")
+    public ResponseEntity<ApiResponse<BulkCycleResponse>> createBulkCycle(
+            @Valid @RequestBody BulkCycleRequest request) {
+
+        BulkCycleResponse response = appraisalService.createBulkCycle(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Bulk cycle created", response));
+    }
+
+    // ── Read ──────────────────────────────────────────────────────
     // GET /api/appraisals/my?employeeId=1
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<List<AppraisalResponse>>> getMyAppraisals(
             @RequestParam Long employeeId) {
- 
-        List<AppraisalResponse> responses = appraisalService.getMyAppraisals(employeeId);
-        return ResponseEntity.ok(ApiResponse.success(responses));
+
+        return ResponseEntity.ok(ApiResponse.success(appraisalService.getMyAppraisals(employeeId)));
     }
 
-    // Manager: get all appraisals for their team
     // GET /api/appraisals/team?managerId=1
     @GetMapping("/team")
     public ResponseEntity<ApiResponse<List<AppraisalResponse>>> getTeamAppraisals(
             @RequestParam Long managerId) {
 
-        List<AppraisalResponse> responses = appraisalService.getTeamAppraisals(managerId);
-        return ResponseEntity.ok(ApiResponse.success(responses));
+        return ResponseEntity.ok(ApiResponse.success(appraisalService.getTeamAppraisals(managerId)));
     }
- 
-    // Any role: get one appraisal by ID
+
     // GET /api/appraisals/{id}?requesterId=1
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AppraisalResponse>> getAppraisalById(
             @PathVariable Long id,
             @RequestParam Long requesterId) {
- 
-        AppraisalResponse response = appraisalService.getAppraisalById(id, requesterId);
-        return ResponseEntity.ok(ApiResponse.success(response));
+
+        return ResponseEntity.ok(ApiResponse.success(appraisalService.getAppraisalById(id, requesterId)));
     }
- 
-    // Employee: submit self-assessment
-    // PUT /api/appraisals/{id}/self-assessment?employeeId=1
-    @PutMapping("/{id}/self-assessment")
+
+    // ── Employee: self-assessment draft ──────────────────────────
+    // PUT /api/appraisals/{id}/self-assessment/draft?employeeId=1
+    @PutMapping("/{id}/self-assessment/draft")
+    public ResponseEntity<ApiResponse<AppraisalResponse>> saveSelfAssessmentDraft(
+            @PathVariable Long id,
+            @Valid @RequestBody SelfAssessmentRequest request,
+            @RequestParam Long employeeId) {
+
+        AppraisalResponse response = appraisalService.saveSelfAssessmentDraft(id, request, employeeId);
+        return ResponseEntity.ok(ApiResponse.success("Draft saved", response));
+    }
+
+    // ── Employee: self-assessment submit ─────────────────────────
+    // PUT /api/appraisals/{id}/self-assessment/submit?employeeId=1
+    @PutMapping("/{id}/self-assessment/submit")
     public ResponseEntity<ApiResponse<AppraisalResponse>> submitSelfAssessment(
             @PathVariable Long id,
             @Valid @RequestBody SelfAssessmentRequest request,
             @RequestParam Long employeeId) {
- 
+
         AppraisalResponse response = appraisalService.submitSelfAssessment(id, request, employeeId);
         return ResponseEntity.ok(ApiResponse.success("Self-assessment submitted", response));
     }
- 
-    // Manager: submit review and rating
-    // PUT /api/appraisals/{id}/manager-review?managerId=1
-    @PutMapping("/{id}/manager-review")
+
+    // ── Manager: review draft ─────────────────────────────────────
+    // PUT /api/appraisals/{id}/manager-review/draft?managerId=1
+    @PutMapping("/{id}/manager-review/draft")
+    public ResponseEntity<ApiResponse<AppraisalResponse>> saveManagerReviewDraft(
+            @PathVariable Long id,
+            @Valid @RequestBody ManagerReviewRequest request,
+            @RequestParam Long managerId) {
+
+        AppraisalResponse response = appraisalService.saveManagerReviewDraft(id, request, managerId);
+        return ResponseEntity.ok(ApiResponse.success("Review draft saved", response));
+    }
+
+    // ── Manager: review submit ────────────────────────────────────
+    // PUT /api/appraisals/{id}/manager-review/submit?managerId=1
+    @PutMapping("/{id}/manager-review/submit")
     public ResponseEntity<ApiResponse<AppraisalResponse>> submitManagerReview(
             @PathVariable Long id,
             @Valid @RequestBody ManagerReviewRequest request,
             @RequestParam Long managerId) {
- 
+
         AppraisalResponse response = appraisalService.submitManagerReview(id, request, managerId);
         return ResponseEntity.ok(ApiResponse.success("Manager review submitted", response));
     }
- 
-    // HR: approve the final appraisal
+
+    // ── HR: approve ───────────────────────────────────────────────
     // PATCH /api/appraisals/{id}/approve
     @PatchMapping("/{id}/approve")
     public ResponseEntity<ApiResponse<AppraisalResponse>> approveAppraisal(
             @PathVariable Long id) {
- 
+
         AppraisalResponse response = appraisalService.approveAppraisal(id);
         return ResponseEntity.ok(ApiResponse.success("Appraisal approved", response));
     }
- 
-    // Employee: acknowledge the final result
+
+    // ── Employee: acknowledge ─────────────────────────────────────
     // PATCH /api/appraisals/{id}/acknowledge?employeeId=1
     @PatchMapping("/{id}/acknowledge")
     public ResponseEntity<ApiResponse<AppraisalResponse>> acknowledgeAppraisal(
             @PathVariable Long id,
             @RequestParam Long employeeId) {
- 
+
         AppraisalResponse response = appraisalService.acknowledgeAppraisal(id, employeeId);
         return ResponseEntity.ok(ApiResponse.success("Appraisal acknowledged", response));
     }

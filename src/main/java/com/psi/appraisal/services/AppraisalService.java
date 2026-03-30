@@ -3,6 +3,8 @@ package com.psi.appraisal.services;
 import java.util.List;
 
 import com.psi.appraisal.dtos.AppraisalResponse;
+import com.psi.appraisal.dtos.BulkCycleRequest;
+import com.psi.appraisal.dtos.BulkCycleResponse;
 import com.psi.appraisal.dtos.CreateAppraisalRequest;
 import com.psi.appraisal.dtos.ManagerReviewRequest;
 import com.psi.appraisal.dtos.SelfAssessmentRequest;
@@ -11,6 +13,9 @@ public interface AppraisalService {
 
     // HR: create a new appraisal for an employee in a cycle
     AppraisalResponse createAppraisal(CreateAppraisalRequest request);
+
+    // HR: bulk create one appraisal per active employee for a cycle
+    BulkCycleResponse createBulkCycle(BulkCycleRequest request);
 
     // Employee: view all their own appraisals
     List<AppraisalResponse> getMyAppraisals(Long employeeId);
@@ -21,10 +26,16 @@ public interface AppraisalService {
     // Any role: view one appraisal by ID (with ownership check)
     AppraisalResponse getAppraisalById(Long appraisalId, Long requesterId);
 
-    // Employee: submit self-assessment — moves status to SELF_SUBMITTED
+    // Employee: save draft — status stays EMPLOYEE_DRAFT, no notification
+    AppraisalResponse saveSelfAssessmentDraft(Long appraisalId, SelfAssessmentRequest request, Long employeeId);
+
+    // Employee: final submit — status moves to SELF_SUBMITTED, notifies manager
     AppraisalResponse submitSelfAssessment(Long appraisalId, SelfAssessmentRequest request, Long employeeId);
 
-    // Manager: submit review — moves status to MANAGER_REVIEWED
+    // Manager: save draft — status stays MANAGER_DRAFT, no notification
+    AppraisalResponse saveManagerReviewDraft(Long appraisalId, ManagerReviewRequest request, Long managerId);
+
+    // Manager: final submit — status moves to MANAGER_REVIEWED, notifies HR + employee
     AppraisalResponse submitManagerReview(Long appraisalId, ManagerReviewRequest request, Long managerId);
 
     // HR: approve final appraisal — moves status to APPROVED
