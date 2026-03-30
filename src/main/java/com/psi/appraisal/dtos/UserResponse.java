@@ -1,5 +1,6 @@
 package com.psi.appraisal.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.psi.appraisal.entity.*;
 import com.psi.appraisal.entity.enums.Role;
 
@@ -20,6 +21,7 @@ public class UserResponse {
     private String departmentName;
     private Long managerId;
     private String managerName;
+    @JsonProperty("isActive")
     private boolean isActive;
     private LocalDateTime createdAt;
 }
