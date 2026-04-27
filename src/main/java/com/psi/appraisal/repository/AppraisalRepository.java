@@ -28,6 +28,15 @@ public interface AppraisalRepository extends JpaRepository<Appraisal, Long> {
             join fetch a.employee e
             left join fetch e.department
             join fetch a.manager
+            """)
+    List<Appraisal> findAllWithDetails();
+
+    @Query("""
+            select a
+            from Appraisal a
+            join fetch a.employee e
+            left join fetch e.department
+            join fetch a.manager
             where a.employee.id = :employeeId
             """)
     List<Appraisal> findByEmployeeId(@Param("employeeId") Long employeeId);

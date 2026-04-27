@@ -23,6 +23,9 @@ public interface AppraisalService {
     // Manager: view all appraisals for their team
     List<AppraisalResponse> getTeamAppraisals(Long managerId);
 
+    // HR: view all appraisals across the company
+    List<AppraisalResponse> getAllAppraisals();
+
     // Any role: view one appraisal by ID (with ownership check)
     AppraisalResponse getAppraisalById(Long appraisalId, Long requesterId);
 
@@ -38,8 +41,8 @@ public interface AppraisalService {
     // Manager: final submit — status moves to MANAGER_REVIEWED, notifies HR + employee
     AppraisalResponse submitManagerReview(Long appraisalId, ManagerReviewRequest request, Long managerId);
 
-    // HR: approve final appraisal — moves status to APPROVED
-    AppraisalResponse approveAppraisal(Long appraisalId);
+    // HR: approve final appraisal — moves status to APPROVED, saves HR final comments
+    AppraisalResponse approveAppraisal(Long appraisalId, String hrComments);
 
     // Employee: acknowledge result — moves status to ACKNOWLEDGED
     AppraisalResponse acknowledgeAppraisal(Long appraisalId, Long employeeId);

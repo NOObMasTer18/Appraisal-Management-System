@@ -17,6 +17,7 @@ public class UserResponse {
     private String fullName;
     private String email;
     private Role role;
+    private Role secondaryRole;
     private String jobTitle;
     private String departmentName;
     private Long managerId;

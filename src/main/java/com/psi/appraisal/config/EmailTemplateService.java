@@ -3,7 +3,7 @@ package com.psi.appraisal.config;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EmailTemplateService {
+public class        EmailTemplateService {
     private static final String PRIMARY_COLOR = "#7c3aed";
     private static final String COMPANY_NAME  = "Appraisal System";
 

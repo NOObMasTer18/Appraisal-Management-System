@@ -17,8 +17,12 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+    @Value("${spring.mail.username:no-reply@psi-appraisal.com}")
+    private String smtpUsername;
+
+    // We shouldn't use the SMTP username as the "From" address because 
+    // for services like Mailtrap, it's just a random string (e.g. "a644395c0ce43e"), not a valid email!
+    private final String fromEmail = "no-reply@psi-appraisal.com";
 
     // @Async means email sending runs in a background thread
     // So the API response doesn't wait for the email to be sent

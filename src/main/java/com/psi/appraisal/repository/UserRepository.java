@@ -71,5 +71,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """)
     List<User> findByRoleAndIsActiveTrue(@Param("role") Role role);
 
+    @Query("""
+            select distinct u
+            from User u
+            left join fetch u.manager
+            left join fetch u.department
+            where u.role in :roles and u.isActive = true
+            """)
+    List<User> findByRoleInAndIsActiveTrue(@Param("roles") List<Role> roles);
+
     List<User> findByDepartmentIdAndIsActiveTrue(Long departmentId);
 }

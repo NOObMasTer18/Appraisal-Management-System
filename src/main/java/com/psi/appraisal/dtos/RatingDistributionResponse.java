@@ -10,6 +10,6 @@ import java.util.Map;
 public class RatingDistributionResponse {
     private String cycleName;
     private long totalRated;
-    private Map<Integer, Long> distribution;
+    private Map<Integer, Long> ratingCounts;
     private Double averageRating;
 }

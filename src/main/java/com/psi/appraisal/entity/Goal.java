@@ -29,7 +29,7 @@ import lombok.Setter;
 public class Goal {
 
 	public enum Status{
-		NOT_STARTED, IN_PROGESS, COMPLETED, CANCELLED
+		NOT_STARTED, IN_PROGRESS, COMPLETED, CANCELLED
 	}
 	
 	@Id
@@ -60,5 +60,11 @@ public class Goal {
 	
 	@Column(name = "due_date")
 	private LocalDate dueDate;
+	
+	@Column(columnDefinition = "TEXT", name = "manager_remarks")
+	private String managerRemarks;
+
+	@Column(columnDefinition = "TEXT", name = "employee_remarks")
+	private String employeeRemarks;
 	
 }

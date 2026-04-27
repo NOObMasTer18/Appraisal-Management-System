@@ -19,4 +19,6 @@ public class BulkCycleRequest {
 
     @NotNull(message = "Cycle end date is required")
     private LocalDate cycleEndDate;
+
+    private Long departmentId;
 }

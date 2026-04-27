@@ -41,6 +41,9 @@ public class AppraisalResponse {
     private String managerComments;
     private Integer managerRating;
 
+    // HR final comments
+    private String hrComments;
+
     // Status & timestamps
     private AppraisalStatus appraisalStatus;
     private LocalDateTime submittedAt;

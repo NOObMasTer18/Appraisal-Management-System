@@ -8,7 +8,7 @@ import lombok.Getter;
 public class DepartmentReportResponse {
     private String departmentName;
     private long totalEmployees;
-    private long completed;
+    private long completedAppraisals;
     private long pending;
     private Double averageRating;
 }

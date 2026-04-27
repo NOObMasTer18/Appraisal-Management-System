@@ -94,7 +94,8 @@ public class NotificationServiceImpl implements NotificationService {
                         emailTemplateService.cycleStarted(
                                 user.getFullName(),
                                 extractCycleName(message),
-                                "", ""   // dates not in message — send generic version
+                                extractDate(message, "startDate"),
+                                extractDate(message, "endDate")
                         );
                 case SELF_ASSESSMENT_SUBMITTED ->
                         emailTemplateService.selfAssessmentSubmitted(
@@ -157,6 +158,30 @@ public class NotificationServiceImpl implements NotificationService {
             return message.split(" has ")[0].trim();
         } catch (Exception ignored) {}
         return "";
+    }
+
+    private String extractDate(String message, String key) {
+        // Parses "[startDate:01 Jan 2025|endDate:31 Dec 2025]" from message
+        // startDate is preceded by '[', endDate by '|'
+        try {
+            String bracketTag = "[" + key + ":";
+            String pipeTag    = "|" + key + ":";
+
+            int tagStart = message.indexOf(bracketTag);
+            int tagLen   = bracketTag.length();
+            if (tagStart == -1) {
+                tagStart = message.indexOf(pipeTag);
+                tagLen   = pipeTag.length();
+            }
+            if (tagStart == -1) return "N/A";
+
+            int valueStart = tagStart + tagLen;
+            int end = message.indexOf("|", valueStart);
+            if (end == -1) end = message.indexOf("]", valueStart);
+            if (end == -1) return "N/A";
+            return message.substring(valueStart, end).trim();
+        } catch (Exception ignored) {}
+        return "N/A";
     }
 
     private String extractFeedbackType(String message) {

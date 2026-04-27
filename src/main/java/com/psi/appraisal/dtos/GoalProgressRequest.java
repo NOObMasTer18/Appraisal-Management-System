@@ -11,4 +11,5 @@ public class GoalProgressRequest {
 
     @NotNull(message = "Status is required")
     private Status status;
+    private String employeeRemarks;
 }

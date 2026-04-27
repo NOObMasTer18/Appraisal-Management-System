@@ -87,6 +87,10 @@ public class Appraisal {
 
 	@Column(name = "manager_rating")
 	private Integer managerRating;
+
+	// HR final comments
+	@Column(name = "hr_comments", columnDefinition = "TEXT")
+	private String hrComments;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "appraisal_status", nullable = false, length = 25)

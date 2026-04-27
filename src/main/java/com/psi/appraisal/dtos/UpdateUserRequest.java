@@ -1,5 +1,6 @@
 package com.psi.appraisal.dtos;
 
+import com.psi.appraisal.entity.enums.Role;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,8 @@ import lombok.Setter;
 public class UpdateUserRequest {
 
     private String fullName;
+    private Role role;
+    private Role secondaryRole;
     private String jobTitle;
     private Long departmentId;
     private Long managerId;

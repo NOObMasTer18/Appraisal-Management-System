@@ -63,6 +63,12 @@ public class AppraisalController {
         return ResponseEntity.ok(ApiResponse.success(appraisalService.getTeamAppraisals(managerId)));
     }
 
+    // GET /api/appraisals/all
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<AppraisalResponse>>> getAllAppraisals() {
+        return ResponseEntity.ok(ApiResponse.success(appraisalService.getAllAppraisals()));
+    }
+
     // GET /api/appraisals/{id}?requesterId=1
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AppraisalResponse>> getAppraisalById(
@@ -121,12 +127,13 @@ public class AppraisalController {
     }
 
     // ── HR: approve ───────────────────────────────────────────────
-    // PATCH /api/appraisals/{id}/approve
+    // PATCH /api/appraisals/{id}/approve?hrComments=...
     @PatchMapping("/{id}/approve")
     public ResponseEntity<ApiResponse<AppraisalResponse>> approveAppraisal(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "") String hrComments) {
 
-        AppraisalResponse response = appraisalService.approveAppraisal(id);
+        AppraisalResponse response = appraisalService.approveAppraisal(id, hrComments);
         return ResponseEntity.ok(ApiResponse.success("Appraisal approved", response));
     }
 

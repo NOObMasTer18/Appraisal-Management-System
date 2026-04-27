@@ -1,6 +1,8 @@
 package com.psi.appraisal.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 import com.psi.appraisal.entity.enums.Role;
 
@@ -16,11 +18,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
@@ -29,7 +30,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
+
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,6 +49,10 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length=20)
 	private Role role;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "secondary_role", nullable = true, length=20)
+	private Role secondaryRole;
 	
 	@Column(name = "job_title", nullable = false)
 	private String jobTitle;
@@ -70,6 +76,18 @@ public class User {
 	public void prePersist() {
 		this.createdAt = LocalDateTime.now();
 	}
-	
-	
+
+
+	@Override
+	@NonNull
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+	}
+
+	@Override
+	@NonNull
+	public String getUsername() {
+		return email;
+	}
+
 }

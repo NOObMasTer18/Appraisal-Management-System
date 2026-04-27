@@ -55,14 +55,19 @@ public class ReportServiceImpl implements ReportService {
         long total = pending + employeeDraft + selfSubmitted + managerDraft
                    + managerReviewed + approved + acknowledged;
 
+        long completedTotal = approved + acknowledged;
+        long pendingTotal = total - completedTotal;
+
         double completionPct = total == 0 ? 0.0
-                : Math.round(((approved + acknowledged) * 100.0 / total) * 10.0) / 10.0;
+                : Math.round((completedTotal * 100.0 / total) * 10.0) / 10.0;
 
         Double avgRating = appraisalRepository.averageManagerRatingForCycle(cycleName);
 
         return CycleSummaryResponse.builder()
                 .cycleName(cycleName)
                 .totalAppraisals(total)
+                .pendingCount(pendingTotal)
+                .completedCount(completedTotal)
                 .pending(pending)
                 .employeeDraft(employeeDraft)
                 .selfSubmitted(selfSubmitted)
@@ -71,7 +76,7 @@ public class ReportServiceImpl implements ReportService {
                 .approved(approved)
                 .acknowledged(acknowledged)
                 .completionPercentage(completionPct)
-                .averageManagerRating(avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : null)
+                .averageRating(avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : null)
                 .build();
     }
 
@@ -122,7 +127,7 @@ public class ReportServiceImpl implements ReportService {
             result.add(DepartmentReportResponse.builder()
                     .departmentName(dept.getName())
                     .totalEmployees(employees.size())
-                    .completed(completed)
+                    .completedAppraisals(completed)
                     .pending(pending)
                     .averageRating(avgRating)
                     .build());
@@ -154,7 +159,7 @@ public class ReportServiceImpl implements ReportService {
         return RatingDistributionResponse.builder()
                 .cycleName(cycleName)
                 .totalRated(total)
-                .distribution(distribution)
+                .ratingCounts(distribution)
                 .averageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : null)
                 .build();
     }

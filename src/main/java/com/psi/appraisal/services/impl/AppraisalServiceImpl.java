@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,8 +51,8 @@ public class AppraisalServiceImpl implements AppraisalService {
         User employee = findUserById(request.getEmployeeId());
         User manager  = findUserById(request.getManagerId());
 
-        if (employee.getRole() != Role.EMPLOYEE)
-            throw new RuntimeException("The assigned employee must have the EMPLOYEE role");
+        if (employee.getRole() != Role.EMPLOYEE && employee.getRole() != Role.MANAGER)
+            throw new RuntimeException("The assigned employee must have the EMPLOYEE or MANAGER role");
         if (manager.getRole() != Role.MANAGER)
             throw new RuntimeException("The assigned manager must have the MANAGER role");
 
@@ -67,11 +68,16 @@ public class AppraisalServiceImpl implements AppraisalService {
 
         appraisalRepository.save(appraisal);
 
+        String startFormatted = request.getCycleStartDate()
+                .format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+        String endFormatted = request.getCycleEndDate()
+                .format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
         notificationService.send(
                 employee.getId(),
                 "Appraisal cycle started",
                 "Your appraisal for cycle '" + request.getCycleName()
-                        + "' has been created. Please submit your self-assessment.",
+                        + "' has been created. Please submit your self-assessment."
+                        + " [startDate:" + startFormatted + "|endDate:" + endFormatted + "]",
                 Type.CYCLE_STARTED
         );
 
@@ -81,7 +87,13 @@ public class AppraisalServiceImpl implements AppraisalService {
     @Override
     @Transactional
     public BulkCycleResponse createBulkCycle(BulkCycleRequest request) {
-        List<User> employees = userRepository.findByRoleAndIsActiveTrue(Role.EMPLOYEE);
+        List<User> employees = userRepository.findByRoleInAndIsActiveTrue(List.of(Role.EMPLOYEE, Role.MANAGER));
+
+        if (request.getDepartmentId() != null) {
+            employees = employees.stream()
+                    .filter(u -> u.getDepartment() != null && u.getDepartment().getId().equals(request.getDepartmentId()))
+                    .collect(Collectors.toList());
+        }
 
         int created = 0, skippedAlreadyExists = 0, skippedNoManager = 0;
 
@@ -112,11 +124,16 @@ public class AppraisalServiceImpl implements AppraisalService {
 
             appraisalRepository.save(appraisal);
 
+            String startFormatted = appraisal.getCycleStartDate()
+                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+            String endFormatted = appraisal.getCycleEndDate()
+                    .format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
             notificationService.send(
                     employee.getId(),
                     "Appraisal cycle started",
                     "Your appraisal for cycle '" + request.getCycleName()
-                            + "' has been created. Please submit your self-assessment.",
+                            + "' has been created. Please submit your self-assessment."
+                            + " [startDate:" + startFormatted + "|endDate:" + endFormatted + "]",
                     Type.CYCLE_STARTED
             );
             created++;
@@ -144,11 +161,21 @@ public class AppraisalServiceImpl implements AppraisalService {
     }
 
     @Override
+    public List<AppraisalResponse> getAllAppraisals() {
+        return appraisalRepository.findAllWithDetails()
+                .stream().map(this::mapToResponse).collect(Collectors.toList());
+    }
+
+    @Override
     public AppraisalResponse getAppraisalById(Long appraisalId, Long requesterId) {
         Appraisal appraisal = findAppraisalById(appraisalId);
+        User requester = findUserById(requesterId);
+
         boolean isEmployee = appraisal.getEmployee().getId().equals(requesterId);
         boolean isManager  = appraisal.getManager().getId().equals(requesterId);
-        if (!isEmployee && !isManager)
+        boolean isHR       = requester.getRole() == Role.HR;
+
+        if (!isEmployee && !isManager && !isHR)
             throw new UnauthorizedAccessException("Access denied: you are not part of this appraisal");
         return mapToResponse(appraisal);
     }
@@ -279,7 +306,7 @@ public class AppraisalServiceImpl implements AppraisalService {
 
     @Override
     @Transactional
-    public AppraisalResponse approveAppraisal(Long appraisalId) {
+    public AppraisalResponse approveAppraisal(Long appraisalId, String hrComments) {
         Appraisal appraisal = findAppraisalById(appraisalId);
 
         if (appraisal.getAppraisalStatus() != AppraisalStatus.MANAGER_REVIEWED) {
@@ -287,6 +314,7 @@ public class AppraisalServiceImpl implements AppraisalService {
                     "Cannot approve. Current status: " + appraisal.getAppraisalStatus());
         }
 
+        appraisal.setHrComments(hrComments != null ? hrComments.trim() : "");
         appraisal.setAppraisalStatus(AppraisalStatus.APPROVED);
         appraisal.setApprovedAt(LocalDateTime.now());
         appraisalRepository.save(appraisal);
@@ -379,6 +407,7 @@ public class AppraisalServiceImpl implements AppraisalService {
         response.setManagerImprovements(appraisal.getManagerImprovements());
         response.setManagerComments(appraisal.getManagerComments());
         response.setManagerRating(appraisal.getManagerRating());
+        response.setHrComments(appraisal.getHrComments());
         response.setAppraisalStatus(appraisal.getAppraisalStatus());
         response.setSubmittedAt(appraisal.getSubmittedAt());
         response.setApprovedAt(appraisal.getApprovedAt());

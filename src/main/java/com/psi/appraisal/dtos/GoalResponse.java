@@ -18,4 +18,6 @@ public class GoalResponse {
     private String description;
     private Status status;
     private LocalDate dueDate;
+    private String managerRemarks;
+    private String employeeRemarks;
 }

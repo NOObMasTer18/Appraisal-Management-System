@@ -8,6 +8,12 @@ import lombok.Getter;
 public class CycleSummaryResponse {
     private String cycleName;
     private long totalAppraisals;
+    private long pendingCount;
+    private long completedCount;
+    private double completionPercentage;
+    private Double averageRating;
+
+    // Detailed breakdown (optional for frontend but kept for internal use if needed)
     private long pending;
     private long employeeDraft;
     private long selfSubmitted;
@@ -15,6 +21,4 @@ public class CycleSummaryResponse {
     private long managerReviewed;
     private long approved;
     private long acknowledged;
-    private double completionPercentage;
-    private Double averageManagerRating;
 }

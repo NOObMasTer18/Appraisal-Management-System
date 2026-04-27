@@ -82,6 +82,7 @@ public class GoalServiceImpl implements GoalService {
         if (request.getTitle() != null) goal.setTitle(request.getTitle());
         if (request.getDescription() != null) goal.setDescription(request.getDescription());
         if (request.getDueDate() != null) goal.setDueDate(request.getDueDate());
+        if (request.getManagerRemarks() != null) goal.setManagerRemarks(request.getManagerRemarks());
 
         goalRepository.save(goal);
         return mapToResponse(goal);
@@ -97,6 +98,9 @@ public class GoalServiceImpl implements GoalService {
         }
 
         goal.setStatus(request.getStatus());
+        if (request.getEmployeeRemarks() != null) {
+            goal.setEmployeeRemarks(request.getEmployeeRemarks());
+        }
         goalRepository.save(goal);
         return mapToResponse(goal);
     }
@@ -129,6 +133,8 @@ public class GoalServiceImpl implements GoalService {
         response.setDescription(goal.getDescription());
         response.setStatus(goal.getStatus());
         response.setDueDate(goal.getDueDate());
+        response.setManagerRemarks(goal.getManagerRemarks());
+        response.setEmployeeRemarks(goal.getEmployeeRemarks());
         return response;
     }
 }
