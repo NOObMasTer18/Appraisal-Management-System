@@ -38,21 +38,21 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedHRUser() {
-        String hrEmail = "hr@psi.com";
-        if (!userRepository.existsByEmail(hrEmail)) {
-            Optional<Department> hrDept = departmentRepository.findByName("HR");
-            
-            User hrUser = User.builder()
-                    .fullName("HR Admin")
-                    .email(hrEmail)
-                    .password(passwordEncoder.encode("hr123"))
-                    .role(Role.HR)
-                    .jobTitle("HR Manager")
-                    .department(hrDept.orElse(null))
-                    .isActive(true)
-                    .build();
-            userRepository.save(hrUser);
-            System.out.println("Seeded HR Admin User: " + hrEmail);
-        }
+    String hrEmail = "hr@psi.com";
+    if (!userRepository.existsByEmail(hrEmail)) {
+        Optional<Department> hrDept = departmentRepository.findByName("HR");
+
+        User hrUser = User.builder()
+                .fullName("HR Admin")
+                .email(hrEmail)
+                .password(passwordEncoder.encode("hr123"))
+                .role(Role.HR)
+                .jobTitle("HR Manager")
+                .department(hrDept.orElse(null))
+                .isActive(true)
+                .build();
+        userRepository.save(hrUser);
+        System.out.println("Seeded HR Admin User: " + hrEmail);
     }
+}
 }
