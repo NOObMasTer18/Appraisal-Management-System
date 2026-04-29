@@ -26,11 +26,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Allow open access to login/register
                         .requestMatchers("/h2-console/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -44,12 +42,12 @@ public class SecurityConfiguration {
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         configuration.setAllowedOriginPatterns(java.util.Arrays.asList(
-            "http://localhost:5173", 
-            "https://*.ngrok-free.dev", 
-            "https://appraisal-management-system-fronten.vercel.app",
-            "https://appraisal-management-system-frontend.vercel.app",
-            "https://*.vercel.app"
-        ));
+                "http://localhost:5173",
+                "https://gumdrop-showing-malt.ngrok-free.dev/api/auth/login",
+                "https://*.ngrok-free.dev",
+                "https://appraisal-management-system-fronten.vercel.app",
+                "https://appraisal-management-system-frontend.vercel.app",
+                "https://*.vercel.app"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
         configuration.setExposedHeaders(java.util.Arrays.asList("x-auth-token", "Authorization"));
