@@ -45,6 +45,7 @@ public class SecurityConfiguration {
                 "http://localhost:5173",
                 "https://gumdrop-showing-malt.ngrok-free.dev",
                 "https://*.ngrok-free.dev",
+                "https://appraisal-management-system-fronten.vercel.app/login",
                 "https://appraisal-management-system-fronten.vercel.app",
                 "https://*.vercel.app"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
