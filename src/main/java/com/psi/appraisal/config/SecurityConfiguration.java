@@ -43,10 +43,9 @@ public class SecurityConfiguration {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         configuration.setAllowedOriginPatterns(java.util.Arrays.asList(
                 "http://localhost:5173",
-                "https://gumdrop-showing-malt.ngrok-free.dev/api/auth/login",
                 "https://gumdrop-showing-malt.ngrok-free.dev",
                 "https://*.ngrok-free.dev",
-                "https://appraisal-management-system-frontend.vercel.app",
+                "https://appraisal-management-system-fronten.vercel.app",
                 "https://*.vercel.app"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
