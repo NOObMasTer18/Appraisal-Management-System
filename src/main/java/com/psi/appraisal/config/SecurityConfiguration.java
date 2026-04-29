@@ -43,15 +43,16 @@ public class SecurityConfiguration {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOrigins(java.util.Arrays.asList(
+        configuration.setAllowedOriginPatterns(java.util.Arrays.asList(
             "http://localhost:5173", 
-            "https://gumdrop-showing-malt.ngrok-free.dev", 
+            "https://*.ngrok-free.dev", 
             "https://appraisal-management-system-fronten.vercel.app",
-            "https://appraisal-management-system-frontend.vercel.app"
+            "https://appraisal-management-system-frontend.vercel.app",
+            "https://*.vercel.app"
         ));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.Arrays.asList("authorization", "content-type", "x-auth-token", "ngrok-skip-browser-warning"));
-        configuration.setExposedHeaders(java.util.Arrays.asList("x-auth-token"));
+        configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
+        configuration.setExposedHeaders(java.util.Arrays.asList("x-auth-token", "Authorization"));
         configuration.setAllowCredentials(true);
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
